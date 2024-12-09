@@ -9,6 +9,7 @@ A project demonstrating how to decode the ExpressLRS (ELRS) protocol using an ES
 
 ## Use Case
 This decoder was used to transform an ordinary FPV drone into a delivery drone by mapping specific channel values to control payload mechanisms. See the [Use Case Documentation](docs/use_case.md) for more details.
+
 ![FPV Drone Video](assets/demo_video.gif)
 
 ## Theory
