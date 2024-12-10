@@ -1,14 +1,12 @@
-### **Theory Documentation (docs/theory.md)**
-
 # Theory: Decoding the CRSF Protocol
 
 ## Overview
-Crossfire (CRSF) is a lightweight and efficient protocol developed by Team BlackSheep (TBS) for transmitting RC channel data, telemetry, and control signals between a transmitter and receiver.
+Crossfire (CRSF) is a lightweight and efficient protocol developed by Team BlackSheep (TBS) for transmitting RC channel data, telemetry, and control signals between a transmitter and receiver. It is commonly used in high-performance RC systems, including ExpressLRS (ELRS), which leverages the CRSF protocol for low-latency, long-range communication.
 
 ---
 
 ## CRSF Protocol Packet Structure
-The CRSF protocol organizes data into packets to efficiently transmit multiple RC channel values, telemetry, and other information. Each packet follows a specific format:
+The CRSF protocol organizes data into packets to efficiently transmit multiple RC channel values, telemetry, and other information. Each packet has a consistent format to ensure efficient communication.
 
 ### **Packet Structure**
 | **Field**       | **Size (Bytes)** | **Description**                                   |
@@ -22,46 +20,54 @@ The CRSF protocol organizes data into packets to efficiently transmit multiple R
 ---
 
 ### **RC Channel Data Packet**
-When transmitting RC channel data, the CRSF protocol encodes up to 16 channels into a compact payload using **11-bit resolution** per channel, as channel values range from 0 to 2000. 11-bit resolution allows you to cater for values from 0 - 2047.
+When transmitting RC channel data, the CRSF protocol encodes up to 16 channels into a compact payload using **11-bit resolution** per channel. These channel values represent the positions of RC controls (e.g., throttle, yaw, pitch, roll) and auxiliary switches.
 
 #### **Structure of RC Channel Data Payload**
 | **Field**       | **Description**                                  |
 |------------------|-------------------------------------------------|
 | **Channels 1-2** | Encoded as 11-bit values, packed into 3 bytes.  |
 | **Channels 3-4** | Encoded as 11-bit values, packed into 3 bytes.  |
-| **...**          | Continue for all 16 channels.                  |
+| **...**          | Continues for all 16 channels.                  |
 
 ---
 
-### **Decoding RC Channel Data**
-To decode the RC channel values, the payload is processed using bitwise operations to extract the 11-bit values for each channel. The steps are as follows:
-1. Read the incoming packet and verify its type (e.g., `0x16` for RC channel data).
-2. Extract the 11-bit channel values by:
-   - Combining adjacent bytes.
-   - Applying bitwise shifts and masks to isolate each channel.
+## Extracting RC Channel Data
+The RC channel data is extracted from the packet payload by processing the 11-bit encoded values. Each channel's 11 bits are spread across adjacent bytes, requiring bitwise operations to isolate and decode them.
+
+### **Steps for Decoding:**
+1. **Verify Packet Type:**
+   - Ensure the packet type is `0x16` (RC channel data).
+   - This ensures the payload contains the encoded channel values.
+
+2. **Extract Channel Values:**
+   - Use bitwise shifts and masks to decode the 11-bit values for each channel.
+   - The process involves combining bits from adjacent bytes.
+
+3. **Iterate Through All Channels:**
+   - Repeat the decoding process for all 16 channels in the payload.
 
 ---
 
-## Example of RC Channel Data Encoding
-Given a payload of 22 bytes for RC channel data:
-- Channels 1–2 are stored across bytes 3–5.
-- Channels 3–4 are stored across bytes 6–8.
-- The pattern continues for all 16 channels.
+### **Example of Channel Data Encoding and Decoding**
 
-#### Example Decoding for First 2 Channels:
+#### Payload Byte Mapping for First Four Channels:
+| **Channel** | **Bits Used**                     | **Bytes Used**  |
+|-------------|-----------------------------------|-----------------|
+| **1**       | Bits 0–10                        | Bytes 3–4       |
+| **2**       | Bits 11–21                       | Bytes 4–5       |
+| **3**       | Bits 22–32                       | Bytes 5–6       |
+| **4**       | Bits 33–43                       | Bytes 6–7       |
+
+#### Example Code to Decode First Two Channels:
 ```cpp
-// Example in C++
+// Extract Channel 1 (Bits 0–10)
 rcChannels[0] = ((packet[3] | (packet[4] << 8)) & 0x07FF);
+
+// Extract Channel 2 (Bits 11–21)
 rcChannels[1] = (((packet[4] >> 3) | (packet[5] << 5)) & 0x07FF);
-
-
-### Decoding Process
-1. Read the incoming CRSF packet from the receiver.
-2. Verify the packet type to ensure it contains RC channel data.
-3. Extract 11-bit channel values using bitwise masking and shifts.
-4. Output the channel values for use in applications.
-
-This decoding method enables precise control and data monitoring for advanced RC applications.
 ```
+
 ### **Checksum**
 The checksum ensures packet integrity by validating the Address, Length, Type, and Payload fields. If the checksum fails, the packet is discarded.
+
+I hope you enjoyed this documentation (hehe)
