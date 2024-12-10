@@ -2,7 +2,7 @@
 
 ## Overview
 By decoding ELRS channel values, you can map RC controls to custom mechanisms. This use case demonstrates how an ordinary FPV drone was transformed into a delivery drone.
-![FPV Drone Video](assets/demo_video.gif)
+![FPV Drone Video](demo_video.gif)
 
 ### Components
 1. **ESP32:**
