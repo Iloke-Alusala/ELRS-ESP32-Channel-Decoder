@@ -12,7 +12,6 @@
 
 Servo mymotor;  // Servo motor object
 
-int led = D2;  // LED pin
 uint16_t rcChannels[16];  // Channel data
 
 // Servo control debouncing variables
@@ -34,12 +33,12 @@ void processCRSFPacket(uint8_t *packet, uint8_t length) {
     rcChannels[6] = ((packet[11] >> 2 | packet[12] << 6) & 0x07FF);
     rcChannels[7] = ((packet[12] >> 5 | packet[13] << 3) & 0x07FF);
 
-    // Print channel values
-    Serial.print("Channels: ");
-    for (int i = 0; i < 16; i++) {
-      Serial.printf("%2d: %4d ", i, rcChannels[i]);
-    }
-    Serial.println();
+    // Print channel values - Uncomment to print
+    // Serial.print("Channels: ");
+    // for (int i = 0; i < 16; i++) {
+    //   Serial.printf("%2d: %4d ", i, rcChannels[i]);
+    // }
+    // Serial.println();
 
     // Debounce logic for channel 7 (Anticlockwise only)
     if (rcChannels[7] >= 1000) {
@@ -47,7 +46,6 @@ void processCRSFPacket(uint8_t *packet, uint8_t length) {
         stableCount++;
         if (stableCount >= STABLE_THRESHOLD) {
           mymotor.write(60);  // Rotate motor anticlockwise (position 0)
-          digitalWrite(led, HIGH);  // Turn on LED
           motorActive = true;
           stableCount = 0;  // Reset counter
         }
@@ -57,7 +55,6 @@ void processCRSFPacket(uint8_t *packet, uint8_t length) {
         stableCount++;
         if (stableCount >= STABLE_THRESHOLD) {
           mymotor.write(90);  // Stop motor
-          digitalWrite(led, LOW);  // Turn off LED
           motorActive = false;
           stableCount = 0;  // Reset counter
         }
@@ -70,7 +67,6 @@ void setup() {
   Serial.begin(115200);  // Initialize serial communication
   CRSF_SERIAL_PORT.begin(CRSF_BAUD_RATE, SERIAL_8N1, RX_PIN);
   mymotor.attach(12);  // Attach servo to GPIO12
-  pinMode(led, OUTPUT);  // Set LED pin as output
 
   Serial.println("CRSF Receiver Initialized.");
 }
