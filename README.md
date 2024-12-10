@@ -1,6 +1,6 @@
-# ELRS Channel Decoder Using ESP32
+# CRSF Protocol Channel Decoder for ELRS Receivers Using ESP32
 
-A project demonstrating how to decode the ExpressLRS (ELRS) protocol using an ESP32 to extract all RC channel values transmitted from an ELRS receiver. This forms the backbone of advanced RC applications, including autonomous control and hardware integration.
+A project showcasing how to decode data from an ExpressLRS (ELRS) receiver using the CRSF protocol, leveraging an ESP32 to extract all RC channel values. This serves as a foundation for advanced RC applications, including autonomous control and hardware integration.
 
 ## Features
 - Decode Crossfire (CRSF) protocol packets from ELRS receivers.
@@ -27,3 +27,5 @@ ELRS transmits RC data using the Crossfire (CRSF) protocol. This project decodes
 1. Clone this repository:
    ```bash
    git clone https://github.com/yourusername/elrs-channel-decoder.git
+
+
