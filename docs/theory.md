@@ -1,34 +1,59 @@
 ### **Theory Documentation (docs/theory.md)**
 
-# Theory: Decoding the ELRS Protocol
+# Theory: Decoding the CRSF Protocol
 
 ## Overview
-ExpressLRS (ELRS) is a high-performance RC link protocol designed for long-range and low-latency communication. It utilizes the Crossfire (CRSF) protocol to transmit control data from the transmitter to the receiver.
+Crossfire (CRSF) is a lightweight and efficient protocol developed by Team BlackSheep (TBS) for transmitting RC channel data, telemetry, and control signals between a transmitter and receiver.
 
-### Key Concepts
-- **Chirp Spread Spectrum (CSS):**
-  ELRS uses CSS modulation for long-range communication with high resilience to interference.
-- **Crossfire (CRSF) Protocol:**
-  A lightweight protocol that encodes multiple RC channel values into compact packets.
+---
 
-## ELRS Protocol Structure
-ELRS transmits data in packets with the following structure:
-- **Header (2 bytes):**
-  - Identifies the start of a packet and specifies the packet type.
-- **Channel Data (22 bytes):**
-  - Contains 16 RC channels, each encoded as an 11-bit value.
-- **Flags and Metadata (1 byte):**
-  - Includes telemetry and control flags.
-- **Checksum (1 byte):**
-  - Ensures data integrity.
+## CRSF Protocol Packet Structure
+The CRSF protocol organizes data into packets to efficiently transmit multiple RC channel values, telemetry, and other information. Each packet follows a specific format:
 
-### Channel Data Encoding
-The 16 RC channels are encoded as **11-bit values** and packed into 22 bytes. The data is extracted using bitwise operations:
-- **Channel 1:** Bits 0–10
-- **Channel 2:** Bits 11–21
-- **Channel 3:** Bits 22–32
-- ...
-- **Channel 16:** Bits 165–175
+### **Packet Structure**
+| **Field**       | **Size (Bytes)** | **Description**                                   |
+|------------------|------------------|---------------------------------------------------|
+| **Address**      | 1                | Identifies the packet sender (e.g., receiver or transmitter). |
+| **Length**       | 1                | Specifies the total packet size (excluding the checksum). |
+| **Type**         | 1                | Defines the type of data in the packet (e.g., RC channels, telemetry). |
+| **Payload**      | Variable         | Contains the actual data (e.g., channel values or telemetry). |
+| **Checksum**     | 1                | Ensures data integrity by validating the packet contents. |
+
+---
+
+### **RC Channel Data Packet**
+When transmitting RC channel data, the CRSF protocol encodes up to 16 channels into a compact payload using **11-bit resolution** per channel, as channel values range from 0 to 2000. 11-bit resolution allows you to cater for values from 0 - 2047.
+
+#### **Structure of RC Channel Data Payload**
+| **Field**       | **Description**                                  |
+|------------------|-------------------------------------------------|
+| **Channels 1-2** | Encoded as 11-bit values, packed into 3 bytes.  |
+| **Channels 3-4** | Encoded as 11-bit values, packed into 3 bytes.  |
+| **...**          | Continue for all 16 channels.                  |
+
+---
+
+### **Decoding RC Channel Data**
+To decode the RC channel values, the payload is processed using bitwise operations to extract the 11-bit values for each channel. The steps are as follows:
+1. Read the incoming packet and verify its type (e.g., `0x16` for RC channel data).
+2. Extract the 11-bit channel values by:
+   - Combining adjacent bytes.
+   - Applying bitwise shifts and masks to isolate each channel.
+
+---
+
+## Example of RC Channel Data Encoding
+Given a payload of 22 bytes for RC channel data:
+- Channels 1–2 are stored across bytes 3–5.
+- Channels 3–4 are stored across bytes 6–8.
+- The pattern continues for all 16 channels.
+
+#### Example Decoding for First 2 Channels:
+```cpp
+// Example in C++
+rcChannels[0] = ((packet[3] | (packet[4] << 8)) & 0x07FF);
+rcChannels[1] = (((packet[4] >> 3) | (packet[5] << 5)) & 0x07FF);
+
 
 ### Decoding Process
 1. Read the incoming CRSF packet from the receiver.
@@ -37,3 +62,6 @@ The 16 RC channels are encoded as **11-bit values** and packed into 22 bytes. Th
 4. Output the channel values for use in applications.
 
 This decoding method enables precise control and data monitoring for advanced RC applications.
+```
+### **Checksum**
+The checksum ensures packet integrity by validating the Address, Length, Type, and Payload fields. If the checksum fails, the packet is discarded.
