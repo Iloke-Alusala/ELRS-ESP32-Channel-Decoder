@@ -11,6 +11,7 @@ A project showcasing how to decode data from an ExpressLRS (ELRS) receiver using
 This decoder was used to transform an ordinary FPV drone into a delivery drone by mapping specific channel values to control payload mechanisms. See the [Use Case Documentation](docs/use_case.md) for more details.
 
 ![FPV Drone Video](assets/demo_video.gif)
+You can find a **detailed tutorial** on replicating the drone project [here](https://www.instructables.com/Turn-Any-Drone-Into-a-Delivery-Drone/).📦
 
 ## Theory
 ELRS transmits RC data using the Crossfire (CRSF) protocol. This project decodes the protocol's structure to access channel values. See the [Theory Documentation](docs/theory.md) for an in-depth explanation.
